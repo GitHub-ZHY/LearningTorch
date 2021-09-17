@@ -18,6 +18,8 @@ import matplotlib.pyplot as plt
 import seaborn
 
 seaborn.set_context(context="talk")
+
+
 # % matplotlib inline # 朱皮特用这个  解决：删掉或者这行代码，用 plt.show() 展示图表。
 
 
@@ -193,6 +195,7 @@ def subsequent_mask(size):
 plt.figure(figsize=(5, 5))
 plt.imshow(subsequent_mask(20)[0])
 plt.show()
+
 
 # endregion
 
@@ -429,6 +432,7 @@ plt.plot(np.arange(1, 20000), [[opt.rate(i) for opt in opts] for i in range(1, 2
 plt.legend(["512:4000", "512:8000", "256:4000"])
 plt.show()
 
+
 # None
 
 # LabelSmoothing
@@ -498,6 +502,7 @@ def loss(x):
 plt.plot(np.arange(1, 100), [loss(x) for x in range(1, 100)])
 plt.show()
 
+
 # endregion
 
 # region 2.8 样例数据
@@ -516,6 +521,7 @@ def data_gen(V, batch, nbatches):
 # 损失计算
 class SimpleLossCompute:
     "A simple loss compute and train function."
+
     def __init__(self, generator, criterion, opt=None):
         self.generator = generator
         self.criterion = criterion
@@ -550,24 +556,27 @@ for epoch in range(10):
     model.eval()
     print(run_epoch(data_gen(V, 30, 5), model,
                     SimpleLossCompute(model.generator, criterion, None)))
+
+
 # 模型评估
 def greedy_decode(model, src, src_mask, max_len, start_symbol):
     memory = model.encode(src, src_mask)
     ys = torch.ones(1, 1).fill_(start_symbol).type_as(src.data)
-    for i in range(max_len-1):
+    for i in range(max_len - 1):
         out = model.decode(memory, src_mask,
                            Variable(ys),
                            Variable(subsequent_mask(ys.size(1))
                                     .type_as(src.data)))
         prob = model.generator(out[:, -1])
-        _, next_word = torch.max(prob, dim = 1)
+        _, next_word = torch.max(prob, dim=1)
         next_word = next_word.data[0]
         ys = torch.cat([ys,
                         torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=1)
     return ys
 
-model.eval() # 评估模式
-src = Variable(torch.LongTensor([[1,2,3,4,5,6,7,8,9,10]]) )
-src_mask = Variable(torch.ones(1, 1, 10) )
+
+model.eval()  # 评估模式
+src = Variable(torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]))
+src_mask = Variable(torch.ones(1, 1, 10))
 print(greedy_decode(model, src, src_mask, max_len=10, start_symbol=1))
 # endregion
